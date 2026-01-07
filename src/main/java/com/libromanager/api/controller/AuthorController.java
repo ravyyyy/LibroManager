@@ -1,8 +1,9 @@
 package com.libromanager.api.controller;
 
 import com.libromanager.api.entity.Author;
-import com.libromanager.api.repository.AuthorRepository;
+import com.libromanager.api.service.AuthorService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,19 +14,20 @@ import java.util.List;
 @RequestMapping("/api/authors")
 public class AuthorController {
 
-    private final AuthorRepository authorRepository;
+    private final AuthorService authorService;
 
-    public AuthorController(AuthorRepository authorRepository) {
-        this.authorRepository = authorRepository;
+    @Autowired
+    public AuthorController(AuthorService authorService) {
+        this.authorService = authorService;
     }
 
     @PostMapping
     public ResponseEntity<Author> createAuthor(@Valid @RequestBody Author author) {
-        return new ResponseEntity<>(authorRepository.save(author), HttpStatus.CREATED);
+        return new ResponseEntity<>(authorService.addAuthor(author), HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<Author>> getAllAuthors() {
-        return new ResponseEntity<>(authorRepository.findAll(), HttpStatus.OK);
+        return new ResponseEntity<>(authorService.getAllAuthors(), HttpStatus.OK);
     }
 }

@@ -1,5 +1,6 @@
 package com.libromanager.api.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -28,9 +29,11 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)
+    @JsonIgnoreProperties("reviews")
     private Book book;
 
     @ManyToOne
     @JoinColumn(name = "reader_id", nullable = false)
+    @JsonIgnoreProperties("reviews")
     private Reader reader;
 }
