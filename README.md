@@ -47,5 +47,14 @@ Once the application is running, you can access the interactive API documentatio
     * `PUT /api/reviews/{id}` - Edit a review
     * `DELETE /api/reviews/{id}` - Delete a review
 
-* **Authors & Publishers**
-    * Full CRUD endpoints available at `/api/authors` and `/api/publishers`.
+* **Authors**
+    * `GET /api/authors` - List all authors
+    * `POST /api/authors` - Add a new author
+    * `PUT /api/authors/{id}` - Update author details
+    * `DELETE /api/authors/{id}` - Delete an author (Unlinks from books first)
+
+* **Publishers**
+    * `GET /api/publishers` - List all publishers
+    * `POST /api/publishers` - Add a new publisher
+    * `PUT /api/publishers/{id}` - Update publisher details
+    * `DELETE /api/publishers/{id}` - Delete a publisher (Cascades to delete books)
