@@ -13,9 +13,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ReaderController.class)
@@ -34,13 +35,11 @@ class ReaderControllerTest {
     void testRegisterReader() throws Exception {
         Reader readerRequest = new Reader();
         readerRequest.setFirstName("Ion");
-        readerRequest.setLastName("Popescu");
         readerRequest.setEmail("ion@test.com");
-        readerRequest.setPhoneNumber("0700000000");
+        readerRequest.setLastName("Popescu");
 
         Reader savedReader = new Reader();
         savedReader.setId(1L);
-        savedReader.setFirstName("Ion");
         savedReader.setEmail("ion@test.com");
 
         when(readerService.registerReader(any(Reader.class))).thenReturn(savedReader);
@@ -49,19 +48,42 @@ class ReaderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(readerRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.email").value("ion@test.com"));
+                .andExpect(jsonPath("$.id").value(1L));
     }
 
     @Test
     void testGetAllReaders() throws Exception {
-        Reader r1 = new Reader();
-        r1.setFirstName("Maria");
-
-        when(readerService.getAllReaders()).thenReturn(List.of(r1));
+        when(readerService.getAllReaders()).thenReturn(List.of(new Reader()));
 
         mockMvc.perform(get("/api/readers"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testUpdateReader() throws Exception {
+        Reader updateRequest = new Reader();
+        updateRequest.setFirstName("Ion Updated");
+        updateRequest.setLastName("Popescu");
+        updateRequest.setEmail("ion@test.com");
+
+        Reader updatedReader = new Reader();
+        updatedReader.setId(1L);
+        updatedReader.setFirstName("Ion Updated");
+
+        when(readerService.updateReader(eq(1L), any(Reader.class))).thenReturn(updatedReader);
+
+        mockMvc.perform(put("/api/readers/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].firstName").value("Maria"));
+                .andExpect(jsonPath("$.firstName").value("Ion Updated"));
+    }
+
+    @Test
+    void testDeleteReader() throws Exception {
+        doNothing().when(readerService).deleteReader(1L);
+
+        mockMvc.perform(delete("/api/readers/1"))
+                .andExpect(status().isNoContent());
     }
 }

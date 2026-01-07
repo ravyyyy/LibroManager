@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,21 +62,37 @@ class ReaderServiceTest {
         });
 
         assertEquals("A reader with this email already exists!", exception.getMessage());
-
         verify(readerRepository, never()).save(any());
     }
 
     @Test
     void testGetAllReaders() {
-        Reader r1 = new Reader();
-        r1.setFirstName("A");
-        Reader r2 = new Reader();
-        r2.setFirstName("B");
+        when(readerRepository.findAll(any(Sort.class))).thenReturn(List.of(new Reader()));
+        assertEquals(1, readerService.getAllReaders().size());
+    }
 
-        when(readerRepository.findAll()).thenReturn(List.of(r1, r2));
+    @Test
+    void testUpdateReader() {
+        Long id = 1L;
+        Reader existing = new Reader();
+        existing.setId(id);
+        existing.setEmail("old@test.com");
 
-        List<Reader> results = readerService.getAllReaders();
+        Reader updateDetails = new Reader();
+        updateDetails.setEmail("new@test.com");
 
-        assertEquals(2, results.size());
+        when(readerRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(readerRepository.existsByEmail("new@test.com")).thenReturn(false);
+        when(readerRepository.save(any())).thenReturn(existing);
+
+        Reader result = readerService.updateReader(id, updateDetails);
+        assertEquals("new@test.com", result.getEmail());
+    }
+
+    @Test
+    void testDeleteReader() {
+        when(readerRepository.existsById(1L)).thenReturn(true);
+        readerService.deleteReader(1L);
+        verify(readerRepository).deleteById(1L);
     }
 }

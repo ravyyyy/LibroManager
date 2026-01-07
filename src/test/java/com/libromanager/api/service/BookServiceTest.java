@@ -108,4 +108,31 @@ class BookServiceTest {
         assertEquals("No valid author was found!", exception.getMessage());
         verify(bookRepository, never()).save(any());
     }
+
+    @Test
+    void testUpdateBook() {
+        Long id = 1L;
+        Book existing = new Book();
+        existing.setId(id);
+        existing.setPublisher(new Publisher(1L, "P", "A", null));
+
+        BookRequestDTO request = new BookRequestDTO();
+        request.setTitle("New Title");
+        request.setPublisherId(1L);
+        request.setAuthorIds(Set.of(1L));
+
+        when(bookRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(authorRepository.findAllById(any())).thenReturn(List.of(new Author()));
+        when(bookRepository.save(any())).thenReturn(existing);
+
+        Book result = bookService.updateBook(id, request);
+        assertEquals("New Title", result.getTitle());
+    }
+
+    @Test
+    void testDeleteBook() {
+        when(bookRepository.existsById(1L)).thenReturn(true);
+        bookService.deleteBook(1L);
+        verify(bookRepository).deleteById(1L);
+    }
 }

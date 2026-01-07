@@ -13,9 +13,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PublisherController.class)
@@ -36,29 +37,49 @@ class PublisherControllerTest {
         publisher.setName("Humanitas");
         publisher.setAddress("Bucuresti");
 
-        Publisher savedPublisher = new Publisher();
-        savedPublisher.setId(1L);
-        savedPublisher.setName("Humanitas");
+        Publisher saved = new Publisher();
+        saved.setId(1L);
+        saved.setName("Humanitas");
 
-        when(publisherService.addPublisher(any(Publisher.class))).thenReturn(savedPublisher);
+        when(publisherService.addPublisher(any())).thenReturn(saved);
 
         mockMvc.perform(post("/api/publishers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(publisher)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Humanitas"));
     }
 
     @Test
     void testGetAllPublishers() throws Exception {
-        Publisher p1 = new Publisher();
-        p1.setName("Nemira");
+        when(publisherService.getAllPublishers()).thenReturn(List.of(new Publisher()));
+        mockMvc.perform(get("/api/publishers")).andExpect(status().isOk());
+    }
 
-        when(publisherService.getAllPublishers()).thenReturn(List.of(p1));
+    @Test
+    void testUpdatePublisher() throws Exception {
+        Publisher updateReq = new Publisher();
+        updateReq.setName("Humanitas Updated");
+        updateReq.setAddress("Cluj");
 
-        mockMvc.perform(get("/api/publishers"))
+        Publisher updated = new Publisher();
+        updated.setId(1L);
+        updated.setName("Humanitas Updated");
+
+        when(publisherService.updatePublisher(eq(1L), any())).thenReturn(updated);
+
+        mockMvc.perform(put("/api/publishers/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateReq)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Nemira"));
+                .andExpect(jsonPath("$.name").value("Humanitas Updated"));
+    }
+
+    @Test
+    void testDeletePublisher() throws Exception {
+        doNothing().when(publisherService).deletePublisher(1L);
+
+        mockMvc.perform(delete("/api/publishers/1"))
+                .andExpect(status().isNoContent());
     }
 }

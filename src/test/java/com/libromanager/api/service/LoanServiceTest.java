@@ -155,4 +155,24 @@ class LoanServiceTest {
 
         assertEquals("The reader hasn't been found!", exception.getMessage());
     }
+
+    @Test
+    void testUpdateLoan_ReturnBook() {
+        Long id = 1L;
+        Book book = new Book(); book.setStock(0);
+        Loan loan = new Loan();
+        loan.setStatus(Loan.LoanStatus.ACTIVE);
+        loan.setBook(book);
+
+        Loan updateInfo = new Loan();
+        updateInfo.setStatus(Loan.LoanStatus.COMPLETED);
+
+        when(loanRepository.findById(id)).thenReturn(Optional.of(loan));
+        when(loanRepository.save(any())).thenReturn(loan);
+
+        loanService.updateLoan(id, updateInfo);
+
+        assertEquals(1, book.getStock());
+        verify(bookRepository).save(book);
+    }
 }

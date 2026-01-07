@@ -88,7 +88,6 @@ class ReviewServiceTest {
 
     @Test
     void testAddReview_ReaderNotFound() {
-        // --- ARRANGE ---
         ReviewRequestDTO request = new ReviewRequestDTO();
         request.setBookId(1L);
         request.setReaderId(99L);
@@ -120,5 +119,25 @@ class ReviewServiceTest {
         assertFalse(results.isEmpty());
         assertEquals(1, results.size());
         assertEquals("Cool", results.get(0).getComment());
+    }
+
+    @Test
+    void testUpdateReview() {
+        Long id = 1L;
+        Review existing = new Review(); existing.setComment("Old");
+        ReviewRequestDTO update = new ReviewRequestDTO(); update.setComment("New");
+
+        when(reviewRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(reviewRepository.save(any())).thenReturn(existing);
+
+        Review res = reviewService.updateReview(id, update);
+        assertEquals("New", res.getComment());
+    }
+
+    @Test
+    void testDeleteReview() {
+        when(reviewRepository.existsById(1L)).thenReturn(true);
+        reviewService.deleteReview(1L);
+        verify(reviewRepository).deleteById(1L);
     }
 }

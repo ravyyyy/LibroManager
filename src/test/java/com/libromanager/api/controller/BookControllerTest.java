@@ -15,9 +15,10 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookController.class)
@@ -59,12 +60,54 @@ class BookControllerTest {
     @Test
     void testGetAllBooks() throws Exception {
         Book b1 = new Book();
-        b1.setTitle("Cartea 1");
+        b1.setTitle("Book 1");
 
         when(bookService.getAllBooks()).thenReturn(List.of(b1));
 
         mockMvc.perform(get("/api/books"))
-                .andExpect(status().isOk()) // Asteptam 200 OK
-                .andExpect(jsonPath("$[0].title").value("Cartea 1"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("Book 1"));
+    }
+
+    @Test
+    void testSearchBooks() throws Exception {
+        Book b1 = new Book();
+        b1.setTitle("Ion");
+
+        when(bookService.searchBookByTitle("Ion")).thenReturn(List.of(b1));
+
+        mockMvc.perform(get("/api/books/search")
+                        .param("title", "Ion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("Ion"));
+    }
+
+    @Test
+    void testUpdateBook() throws Exception {
+        BookRequestDTO updateRequest = new BookRequestDTO();
+        updateRequest.setTitle("Updated Title");
+        updateRequest.setIsbn("999-888");
+        updateRequest.setPublisherId(1L);
+        updateRequest.setAuthorIds(Set.of(1L));
+
+        Book updatedBook = new Book();
+        updatedBook.setId(1L);
+        updatedBook.setTitle("Updated Title");
+
+        when(bookService.updateBook(eq(1L), any(BookRequestDTO.class))).thenReturn(updatedBook);
+
+        mockMvc.perform(put("/api/books/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated Title"));
+    }
+
+    @Test
+    void testDeleteBook() throws Exception {
+        doNothing().when(bookService).deleteBook(1L);
+
+        mockMvc.perform(delete("/api/books/1"))
+                .andExpect(status().isNoContent());
     }
 }

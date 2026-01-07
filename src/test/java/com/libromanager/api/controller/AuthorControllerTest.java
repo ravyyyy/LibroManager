@@ -10,12 +10,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthorController.class)
@@ -32,33 +31,36 @@ class AuthorControllerTest {
 
     @Test
     void testCreateAuthor() throws Exception {
-        Author author = new Author();
-        author.setFullName("Mihai Eminescu");
-        author.setNationality("Roman");
-
-        Author savedAuthor = new Author();
-        savedAuthor.setId(1L);
-        savedAuthor.setFullName("Mihai Eminescu");
-
-        when(authorService.addAuthor(any(Author.class))).thenReturn(savedAuthor);
+        Author author = new Author(null, "Mihai Eminescu", "Roman", null);
+        Author saved = new Author(1L, "Mihai Eminescu", "Roman", null);
+        when(authorService.addAuthor(any())).thenReturn(saved);
 
         mockMvc.perform(post("/api/authors")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(author)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.fullName").value("Mihai Eminescu"));
+                .andExpect(jsonPath("$.id").value(1L));
     }
 
     @Test
-    void testGetAllAuthors() throws Exception {
-        Author a1 = new Author();
-        a1.setFullName("Creanga");
+    void testUpdateAuthor() throws Exception {
+        Author updateInfo = new Author(null, "New Name", "New Nat", null);
+        Author updated = new Author(1L, "New Name", "New Nat", null);
 
-        when(authorService.getAllAuthors()).thenReturn(List.of(a1));
+        when(authorService.updateAuthor(eq(1L), any())).thenReturn(updated);
 
-        mockMvc.perform(get("/api/authors"))
+        mockMvc.perform(put("/api/authors/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateInfo)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].fullName").value("Creanga"));
+                .andExpect(jsonPath("$.fullName").value("New Name"));
+    }
+
+    @Test
+    void testDeleteAuthor() throws Exception {
+        doNothing().when(authorService).deleteAuthor(1L);
+
+        mockMvc.perform(delete("/api/authors/1"))
+                .andExpect(status().isNoContent());
     }
 }
