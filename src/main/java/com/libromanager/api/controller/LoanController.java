@@ -31,4 +31,15 @@ public class LoanController {
     public ResponseEntity<List<Loan>> getAllLoans() {
         return new ResponseEntity<>(loanService.getAllLoans(), HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Loan> updateLoan(@PathVariable Long id, @RequestBody Loan loan) {
+        return new ResponseEntity<>(loanService.updateLoan(id, loan), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLoan(@PathVariable Long id) {
+        loanService.deleteLoan(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

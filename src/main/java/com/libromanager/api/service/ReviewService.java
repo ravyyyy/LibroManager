@@ -8,6 +8,7 @@ import com.libromanager.api.repository.BookRepository;
 import com.libromanager.api.repository.ReaderRepository;
 import com.libromanager.api.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,10 +44,28 @@ public class ReviewService {
     }
 
     public List<Review> getAllReviews() {
-        return reviewRepository.findAll();
+        return reviewRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     public List<Review> getReviewsForBook(Long bookId) {
         return reviewRepository.findByBookId(bookId);
+    }
+
+    public Review updateReview(Long id, ReviewRequestDTO reviewDetails) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review with id " + id + " was not found"));
+
+        review.setRating(reviewDetails.getRating());
+        review.setComment(reviewDetails.getComment());
+
+        return reviewRepository.save(review);
+    }
+
+    public void deleteReview(Long id) {
+        if (!reviewRepository.existsById(id)) {
+            throw new RuntimeException("Review with id " + id + " was not found");
+        }
+
+        reviewRepository.deleteById(id);
     }
 }

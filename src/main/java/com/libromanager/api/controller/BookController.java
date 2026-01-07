@@ -36,4 +36,15 @@ public class BookController {
     public ResponseEntity<List<Book>> searchBooks(@RequestParam String title) {
         return new ResponseEntity<>(bookService.searchBookByTitle(title), HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Book> updateBook(@PathVariable Long id, @Valid @RequestBody BookRequestDTO request) {
+        return new ResponseEntity<>(bookService.updateBook(id, request), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+        bookService.deleteBook(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

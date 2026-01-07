@@ -30,4 +30,15 @@ public class AuthorController {
     public ResponseEntity<List<Author>> getAllAuthors() {
         return new ResponseEntity<>(authorService.getAllAuthors(), HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Author> updateAuthor(@PathVariable Long id, @Valid @RequestBody Author author) {
+        return new ResponseEntity<>(authorService.updateAuthor(id, author), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
+        authorService.deleteAuthor(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

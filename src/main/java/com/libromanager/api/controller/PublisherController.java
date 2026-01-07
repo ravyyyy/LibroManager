@@ -30,4 +30,15 @@ public class PublisherController {
     public ResponseEntity<List<Publisher>> getAllPublishers() {
         return new ResponseEntity<>(publisherService.getAllPublishers(), HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Publisher> updatePublisher(@PathVariable Long id, @Valid @RequestBody Publisher publisher) {
+        return new ResponseEntity<>(publisherService.updatePublisher(id, publisher), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePublisher(@PathVariable Long id) {
+        publisherService.deletePublisher(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

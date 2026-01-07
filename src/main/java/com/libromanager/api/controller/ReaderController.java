@@ -30,4 +30,15 @@ public class ReaderController {
     public ResponseEntity<List<Reader>> getAllReaders() {
         return new ResponseEntity<>(readerService.getAllReaders(), HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Reader> updateReader(@PathVariable Long id, @Valid @RequestBody Reader reader) {
+        return new ResponseEntity<>(readerService.updateReader(id, reader), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReader(@PathVariable Long id) {
+        readerService.deleteReader(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

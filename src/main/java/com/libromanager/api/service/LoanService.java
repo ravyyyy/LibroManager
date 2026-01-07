@@ -9,6 +9,7 @@ import com.libromanager.api.repository.LoanRepository;
 import com.libromanager.api.repository.ReaderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -59,6 +60,41 @@ public class LoanService {
     }
 
     public List<Loan> getAllLoans() {
-        return loanRepository.findAll();
+        return loanRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    }
+
+    @Transactional
+    public Loan updateLoan(Long id, Loan loanDetails) {
+        Loan loan = loanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Loan with id " + " was not found"));
+
+        if (loan.getStatus() == Loan.LoanStatus.ACTIVE && loanDetails.getStatus() == Loan.LoanStatus.COMPLETED) {
+            loan.setStatus(Loan.LoanStatus.COMPLETED);
+            loan.setReturnDate(LocalDate.now());
+
+            Book book = loan.getBook();
+            book.setStock(book.getStock() + 1);
+            bookRepository.save(book);
+        }
+
+        if (loanDetails.getDueDate() != null) {
+            loan.setDueDate(loanDetails.getDueDate());
+        }
+
+        return loanRepository.save(loan);
+    }
+
+    @Transactional
+    public void deleteLoan(Long id) {
+        Loan loan = loanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Loan with id " + " was not found"));
+
+        if (loan.getStatus() == Loan.LoanStatus.ACTIVE) {
+            Book book = loan.getBook();
+            book.setStock(book.getStock() + 1);
+            bookRepository.save(book);
+        }
+
+        loanRepository.delete(loan);
     }
 }

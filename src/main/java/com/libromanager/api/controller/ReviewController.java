@@ -36,4 +36,15 @@ public class ReviewController {
     public ResponseEntity<List<Review>> getReviewsByBook(@PathVariable Long bookId) {
         return new ResponseEntity<>(reviewService.getReviewsForBook(bookId), HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Review> updateReview(@PathVariable Long id, @Valid @RequestBody ReviewRequestDTO request) {
+        return new ResponseEntity<>(reviewService.updateReview(id, request), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
+        reviewService.deleteReview(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

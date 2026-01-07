@@ -32,11 +32,11 @@ public class Reader {
 
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "reader")
+    @OneToMany(mappedBy = "reader", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Loan> loans;
 
-    @OneToMany(mappedBy = "reader")
+    @OneToMany(mappedBy = "reader", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Review> reviews;
 }
